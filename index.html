@@ -19,21 +19,20 @@
 </head>
 
 <body>
-    <script>
-        const SUPABASE_URL = 'https://rjrlrehswrhtrqxtulji.supabase.co';
+       <script>
+        const SUPABASE_URL = 'https://rjrlrehswrhtrqxtulji.supabase.co/';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqcmxyZWhzd3JodHJxeHR1bGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTYyNDEsImV4cCI6MjA4OTE3MjI0MX0.hf-p66JFfJsaZ2RNliT9ww4UNUFy4e9YzBOUIgnSKQk';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function logVisit() {
             try {
-                // Using ipapi.co to avoid the 403 Forbidden error you got earlier
                 const res = await fetch('https://ipapi.co/json/');
                 const data = await res.json();
 
-                // ONLY the info you requested
+                // Only the specific fields you asked for
                 const payload = {
                     ip: data.ip,
-                    continent: data.continent_name, // ipapi calls it continent_name
+                    continent: data.continent_name,
                     continent_code: data.continent_code,
                     country: data.country_name,
                     region: data.region,
@@ -47,7 +46,7 @@
                     .insert([payload]);
 
                 if (error) throw error;
-                console.log("Logged successfully.");
+                console.log("Logged to Supabase (AZ Time)");
 
             } catch (err) {
                 console.error("Error:", err.message);
