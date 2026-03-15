@@ -20,57 +20,43 @@
 
 <body>
     <script>
-        const SUPABASE_URL = 'https://rjrlrehswrhtrqxtulji.supabase.co/';
+        const SUPABASE_URL = 'https://rjrlrehswrhtrqxtulji.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqcmxyZWhzd3JodHJxeHR1bGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTYyNDEsImV4cCI6MjA4OTE3MjI0MX0.hf-p66JFfJsaZ2RNliT9ww4UNUFy4e9YzBOUIgnSKQk';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function logVisitor() {
+        async function logVisit() {
+            const statusEl = document.getElementById('status');
+            
             try {
-                // 1. Fetch from ipwho.is
                 const res = await fetch('https://ipwho.is/');
                 const data = await res.json();
 
-                if (!data.success) return; // Exit if the API failed
-
-                // 2. Map the nested ipwho.is data to our flat table structure
+                // FLATTEN THE DATA: Map nested API keys to flat DB columns
                 const payload = {
                     ip: data.ip,
-                    success: data.success,
-                    type: data.type,
-                    continent: data.continent,
-                    country: data.country,
-                    country_code: data.country_code,
-                    region: data.region,
                     city: data.city,
+                    region: data.region,
+                    country: data.country,
                     latitude: data.latitude,
                     longitude: data.longitude,
-                    is_eu: data.is_eu,
-                    postal: data.postal,
-                    calling_code: data.calling_code,
-                    capital: data.capital,
-                    borders: data.borders,
-                    flag_img: data.flag.img,
-                    connection_asn: data.connection.asn,
-                    connection_org: data.connection.org,
-                    timezone_id: data.timezone.id,
-                    timezone_utc: data.timezone.utc
+                    asn: data.connection?.asn, // Extract from nested 'connection'
+                    org: data.connection?.org  // Extract from nested 'connection'
                 };
 
-                // 3. Insert into Supabase
                 const { error } = await _supabase
                     .from('visitor_logs')
                     .insert([payload]);
 
-                if (error) console.error("Supabase Error:", error.message);
-                else console.log("Visit logged successfully.");
+                if (error) throw error;
+                if (statusEl) statusEl.innerText = "Visit logged.";
 
             } catch (err) {
-                console.error("Fetch Error:", err);
+                console.error("Error:", err);
+                if (statusEl) statusEl.innerText = "Failed to log visit.";
             }
         }
 
-        // Run as soon as the script loads
-        logVisitor();
+        window.onload = logVisit;
     </script>
     <header>
         <div class="container">
