@@ -18,38 +18,44 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-    // Supabase bilgilerini buraya gir
-    const SUPABASE_URL = 'https://rjrlrehswrhtrqxtulji.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqcmxyZWhzd3JodHJxeHR1bGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTYyNDEsImV4cCI6MjA4OTE3MjI0MX0.hf-p66JFfJsaZ2RNliT9ww4UNUFy4e9YzBOUIgnSKQk';
+        // Supabase Bağlantısı
+        const SUPABASE_URL = 'https://kyrkshvrtfdyksnduxon.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5cmtzaHZydGZkeWtzbmR1eG9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1MjY2MTQsImV4cCI6MjA3MzEwMjYxNH0.51wxv0R3pM089tm16__OE_u9MxewSNRmOR-zWd7Tslc';
+        
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // supabase.createClient kullanarak başlatıyoruz
-    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        async function logToSupabase() {
+            try {
+                // ipapi limitine takılmamak için alternatif servis (ipwhois)
+                const res = await fetch('https://ipwho.is/');
+                const data = await res.json();
 
-    async function logToSupabase() {
-        try {
-            // 1. ipapi.co'dan veriyi al
-            const res = await fetch('https://ipapi.co/json/');
-            const fullData = await res.json();
+                // Veritabanı tablonla eşleşen veriler
+                const payload = {
+                    ip: data.ip,
+                    city: data.city,
+                    country_name: data.country,
+                    country_code: data.country_code,
+                    region: data.region,
+                    latitude: data.latitude,
+                    longitude: data.longitude,
+                    org: data.connection.isp
+                };
 
-            console.log("Veri çekildi:", fullData);
+                const { error } = await client
+                    .from('user_logs') // Tablo adının 'user_logs' olduğundan emin ol
+                    .insert([payload]);
 
-            // 2. Veritabanına (user_logs tablosuna) gönder
-            const { data, error } = await client
-                .from('user_logs')
-                .insert([fullData]);
+                if (error) throw error;
+                console.log("Kayıt başarılı!");
 
-            if (error) {
-                console.error("Supabase Hatası:", error.message);
-            } else {
-                console.log("Başarıyla kaydedildi!");
+            } catch (err) {
+                console.error("Hata:", err.message);
             }
-        } catch (err) {
-            console.error("Bağlantı Hatası:", err);
         }
-    }
 
-    // Sayfa yüklendiğinde çalıştır
-    window.onload = logToSupabase;
+        // Sayfa tamamen yüklendiğinde çalıştır
+        window.onload = logToSupabase;
     </script>
     
 </head>
