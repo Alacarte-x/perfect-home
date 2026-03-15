@@ -26,10 +26,10 @@
 
         async function logVisit() {
             try {
+                // Fetching from ipapi.co (more stable for local testing)
                 const res = await fetch('https://ipapi.co/json/');
                 const data = await res.json();
 
-                // Only the specific fields you asked for
                 const payload = {
                     ip: data.ip,
                     continent: data.continent_name,
@@ -46,10 +46,10 @@
                     .insert([payload]);
 
                 if (error) throw error;
-                console.log("Logged to Supabase (AZ Time)");
+                console.log("Visit logged at Azerbaijan Time!");
 
             } catch (err) {
-                console.error("Error:", err.message);
+                console.error("Log Error:", err.message);
             }
         }
 
