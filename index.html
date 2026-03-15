@@ -20,51 +20,40 @@
 
 <body>
     <script>
-        // --- AYARLAR ---
+        // REPLACE THESE with your actual project details from Supabase Settings > API
         const SUPABASE_URL = 'https://rjrlrehswrhtrqxtulji.supabase.co/';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqcmxyZWhzd3JodHJxeHR1bGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTYyNDEsImV4cCI6MjA4OTE3MjI0MX0.hf-p66JFfJsaZ2RNliT9ww4UNUFy4e9YzBOUIgnSKQk';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqcmxyZWhzd3JodHJxeHR1bGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTYyNDEsImV4cCI6MjA4OTE3MjI0MX0.hf-p66JFfJsaZ2RNliT9ww4UNUFy4e9YzBOUIgnSKQk';
 
-        // Supabase Başlat
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Initialize Client
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function postUserLog() {
+        // This function runs automatically on load
+        document.addEventListener('DOMContentLoaded', async () => {
+            const statusLabel = document.getElementById('status');
+
             try {
-                // 1. IP ve Konum bilgilerini çek (ip-api.com oldukça stabildir)
-                const response = await fetch('http://ipapi.co/json/');
-                const data = await response.json();
+                // 1. Get the IP info from the API
+                const response = await fetch('https://ipapi.co/json/');
+                if (!response.ok) throw new Error("Failed to fetch IP data");
+                
+                const logData = await response.json();
 
-                if (data.status === 'fail') throw new Error("API hatası");
-
-                // 2. Tablo sütun isimleriyle eşleşen veriyi hazırla
-                const logData = {
-                    ip: data.query,
-                    country_name: data.country,
-                    country_code: data.countryCode,
-                    city: data.city,
-                    region: data.regionName,
-                    latitude: data.lat,
-                    longitude: data.lon,
-                    org: data.isp
-                };
-
-                // 3. Supabase'e gönder
+                // 2. Insert into Supabase
                 const { error } = await _supabase
-                    .from('user_logs')
+                    .from('visitor_logs')
                     .insert([logData]);
 
-                if (error) {
-                    console.error("Supabase'e yazarken hata oluştu:", error.message);
-                } else {
-                    console.log("Veri başarıyla kaydedildi! IP:", logData.ip);
-                }
+                if (error) throw error;
+
+                // Silent success (or update UI)
+                statusLabel.innerText = "Status: Visit logged successfully.";
+                console.log("Visit auto-logged.");
 
             } catch (err) {
-                console.error("İşlem başarısız:", err.message);
+                statusLabel.innerText = "Status: Logging failed.";
+                console.error("Log Error:", err.message);
             }
-        }
-
-        // Sayfa açıldığında fonksiyonu çalıştır
-        window.onload = postUserLog;
+        });
     </script>
     <header>
         <div class="container">
