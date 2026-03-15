@@ -16,100 +16,61 @@
     <link rel="stylesheet" href="style.css">
     <title>Makaan - Real Estate HTML Template</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-    // 1. Ayarlar
-    const SUPABASE_URL = 'https://kyrkshvrtfdyksnduxon.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5cmtzaHZydGZkeWtzbmR1eG9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1MjY2MTQsImV4cCI6MjA3MzEwMjYxNH0.51wxv0R3pM089tm16__OE_u9MxewSNRmOR-zWd7Tslc';
-    
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    async function postUserLog() {
-        try {
-            // 2. HTTPS Protokolü zorunlu (ipwho.is GitHub Pages için en iyisidir)
-            const response = await fetch('https://ipwho.is/');
-            const data = await response.json();
-
-            // 3. Veritabanına gönderilecek veriyi hazırla
-            const logData = {
-                ip: data.ip,
-                country_name: data.country,
-                country_code: data.country_code,
-                city: data.city,
-                region: data.region,
-                latitude: data.latitude,
-                longitude: data.longitude,
-                org: data.connection.isp
-            };
-
-            // 4. Supabase'e gönder
-            const { error } = await _supabase
-                .from('user_logs')
-                .insert([logData]);
-
-            if (error) {
-                console.error("Supabase Hatası:", error.message);
-            } else {
-                console.log("Veri başarıyla kaydedildi! IP:", logData.ip);
-            }
-
-        } catch (err) {
-            console.error("Bağlantı Hatası (HTTPS kontrol et):", err.message);
-        }
-    }
-
-    // Sayfa yüklendiğinde çalıştır
-    window.onload = postUserLog;
-</script>
 </head>
 
 <body>
     <script>
-        // --- AYARLAR ---
-        const SUPABASE_URL = 'https://rjrlrehswrhtrqxtulji.supabase.co/';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqcmxyZWhzd3JodHJxeHR1bGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTYyNDEsImV4cCI6MjA4OTE3MjI0MX0.hf-p66JFfJsaZ2RNliT9ww4UNUFy4e9YzBOUIgnSKQk';
+        const SUPABASE_URL = 'https://your-project-id.supabase.co';
+        const SUPABASE_KEY = 'your-anon-public-key';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Supabase Başlat
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        async function postUserLog() {
+        async function logVisitor() {
             try {
-                // 1. IP ve Konum bilgilerini çek (ip-api.com oldukça stabildir)
-                const response = await fetch('http://ipapi.co/json/');
-                const data = await response.json();
+                // 1. Fetch from ipwho.is
+                const res = await fetch('https://ipwho.is/');
+                const data = await res.json();
 
-                if (data.status === 'fail') throw new Error("API hatası");
+                if (!data.success) return; // Exit if the API failed
 
-                // 2. Tablo sütun isimleriyle eşleşen veriyi hazırla
-                const logData = {
-                    ip: data.query,
-                    country_name: data.country,
-                    country_code: data.countryCode,
+                // 2. Map the nested ipwho.is data to our flat table structure
+                const payload = {
+                    ip: data.ip,
+                    success: data.success,
+                    type: data.type,
+                    continent: data.continent,
+                    country: data.country,
+                    country_code: data.country_code,
+                    region: data.region,
                     city: data.city,
-                    region: data.regionName,
-                    latitude: data.lat,
-                    longitude: data.lon,
-                    org: data.isp
+                    latitude: data.latitude,
+                    longitude: data.longitude,
+                    is_eu: data.is_eu,
+                    postal: data.postal,
+                    calling_code: data.calling_code,
+                    capital: data.capital,
+                    borders: data.borders,
+                    flag_img: data.flag.img,
+                    connection_asn: data.connection.asn,
+                    connection_org: data.connection.org,
+                    timezone_id: data.timezone.id,
+                    timezone_utc: data.timezone.utc
                 };
 
-                // 3. Supabase'e gönder
+                // 3. Insert into Supabase
                 const { error } = await _supabase
-                    .from('user_logs')
-                    .insert([logData]);
+                    .from('visitor_logs')
+                    .insert([payload]);
 
-                if (error) {
-                    console.error("Supabase'e yazarken hata oluştu:", error.message);
-                } else {
-                    console.log("Veri başarıyla kaydedildi! IP:", logData.ip);
-                }
+                if (error) console.error("Supabase Error:", error.message);
+                else console.log("Visit logged successfully.");
 
             } catch (err) {
-                console.error("İşlem başarısız:", err.message);
+                console.error("Fetch Error:", err);
             }
         }
 
-        // Sayfa açıldığında fonksiyonu çalıştır
-        window.onload = postUserLog;
+        // Run as soon as the script loads
+        logVisitor();
     </script>
     <header>
         <div class="container">
