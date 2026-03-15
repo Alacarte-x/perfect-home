@@ -30,7 +30,7 @@
         async function postUserLog() {
             try {
                 // 1. IP ve Konum bilgilerini çek (ip-api.com oldukça stabildir)
-                const response = await fetch('http://ip-api.com/json/');
+                const response = await fetch('http://ipapi.co/json/');
                 const data = await response.json();
 
                 if (data.status === 'fail') throw new Error("API hatası");
