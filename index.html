@@ -15,42 +15,43 @@
     <link rel="stylesheet" href="reset.css">
     <link rel="stylesheet" href="style.css">
     <title>Makaan - Real Estate HTML Template</title>
-    
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
-        // Supabase bağlantısı (Burayı kendi bilgilerinle doldur)
-const SUPABASE_URL = 'https://rjrlrehswrhtrqxtulji.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqcmxyZWhzd3JodHJxeHR1bGppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1OTYyNDEsImV4cCI6MjA4OTE3MjI0MX0.hf-p66JFfJsaZ2RNliT9ww4UNUFy4e9YzBOUIgnSKQk';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Supabase bilgilerini buraya gir
+    const SUPABASE_URL = 'https://kyrkshvrtfdyksnduxon.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt5cmtzaHZydGZkeWtzbmR1eG9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc1MjY2MTQsImV4cCI6MjA3MzEwMjYxNH0.51wxv0R3pM089tm16__OE_u9MxewSNRmOR-zWd7Tslc';
 
-async function logAllUserData() {
-    try {
-        // 1. ipapi'den tüm bilgileri al
-        const response = await fetch('https://ipapi.co/json/');
-        const fullData = await response.json();
+    // supabase.createClient kullanarak başlatıyoruz
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        console.log("Veriler alındı, gönderiliyor...", fullData);
+    async function logToSupabase() {
+        try {
+            // 1. ipapi.co'dan veriyi al
+            const res = await fetch('https://ipapi.co/json/');
+            const fullData = await res.json();
 
-        // 2. Veritabanına tek seferde POST et
-        // Sütun isimleri JSON key'leri ile aynı olduğu için direkt fullData'yı gönderiyoruz
-        const { data, error } = await supabase
-            .from('user_logs')
-            .insert([fullData]);
+            console.log("Veri çekildi:", fullData);
 
-        if (error) {
-            console.error('SQL Hatası:', error.message);
-        } else {
-            console.log('Tüm veriler başarıyla veritabanına kaydedildi!');
+            // 2. Veritabanına (user_logs tablosuna) gönder
+            const { data, error } = await client
+                .from('user_logs')
+                .insert([fullData]);
+
+            if (error) {
+                console.error("Supabase Hatası:", error.message);
+            } else {
+                console.log("Başarıyla kaydedildi!");
+            }
+        } catch (err) {
+            console.error("Bağlantı Hatası:", err);
         }
-
-    } catch (err) {
-        console.error('Bağlantı Hatası:', err);
     }
-}
 
-// Sayfa açılır açılmaz çalıştır
-window.onload = logAllUserData;
+    // Sayfa yüklendiğinde çalıştır
+    window.onload = logToSupabase;
     </script>
+    
 </head>
 
 <body>
